@@ -15,6 +15,8 @@ from config import settings
 
 __all__ = ["app"]
 
+from middleware import add_middleware
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -70,19 +72,10 @@ def custom_openapi():
 
 app.openapi = custom_openapi
 
-app.add_middleware(SessionMiddleware, secret_key=secrets.token_hex(32))
-# CORS配置
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    max_age=2592000
-)
 # 全局异常处理
 # configure_exception(app)
-
+# 中间件
+add_middleware(app=app)
 white_list = ["/docs", "/openapi.json", "/redoc"]
 
 
