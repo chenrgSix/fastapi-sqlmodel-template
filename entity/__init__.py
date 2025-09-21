@@ -13,14 +13,39 @@ from entity.base_entity import DbBaseModel
 
 engine = create_async_engine(
     settings.database_url,
-    echo=True,  # 打印SQL日志（生产环境建议关闭）
+    echo=False,  # 打印SQL日志（生产环境建议关闭）
     pool_size=10,  # 连接池大小
     max_overflow=20,  # 最大溢出连接数
     pool_recycle=3600,  # 连接回收时间（秒），解决MySQL超时断开问题【4†source】【5†source】
 )
 
+
 # 创建异步会话工厂
 class EnhanceAsyncSession(AsyncSession):
+    async def scalar(self, statement: Executable,
+                     params=None,
+                     *,
+                     execution_options=None,
+                     bind_arguments=None,
+                     **kw: Any, ):
+
+        sig = inspect.signature(super().scalar)
+        if execution_options is None:
+            default_execution_options = sig.parameters['execution_options'].default
+            execution_options = default_execution_options
+        delete_condition = column(Constant.LOGICAL_DELETE_FIELD) == IsDelete.NO_DELETE
+        existing_condition = statement.whereclause
+        # 组合条件
+        if existing_condition is not None:
+            # 使用and_组合现有条件和逻辑删除条件
+            new_condition = and_(existing_condition, delete_condition)
+        else:
+            new_condition = delete_condition
+            # 应用新条件（创建新的Select对象）
+        statement = statement.where(new_condition)
+        return await super().scalar(statement, params, execution_options=execution_options,
+                                    bind_arguments=bind_arguments, **kw)
+
     async def execute(
             self,
             statement: Executable,
@@ -34,7 +59,7 @@ class EnhanceAsyncSession(AsyncSession):
         if execution_options is None:
             default_execution_options = sig.parameters['execution_options'].default
             execution_options = default_execution_options
-
+        print("type(statement):{}", type(statement))
         if isinstance(statement, Select):
             print("这是查询语句，过滤逻辑删除")
             delete_condition = column(Constant.LOGICAL_DELETE_FIELD) == IsDelete.NO_DELETE
@@ -46,8 +71,8 @@ class EnhanceAsyncSession(AsyncSession):
                 new_condition = and_(existing_condition, delete_condition)
             else:
                 new_condition = delete_condition
-                # 应用新条件（创建新的Select对象）
-                statement = statement.where(new_condition)
+            # 应用新条件（创建新的Select对象）
+            statement = statement.where(new_condition)
         if isinstance(statement, Delete):
             # 检查是否跳过软删除（通过execution_options控制）
             skip_soft_delete = execution_options and execution_options.get("skip_soft_delete", False)

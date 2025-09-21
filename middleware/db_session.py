@@ -4,7 +4,7 @@ from core.global_context import current_session
 from entity import AsyncSessionLocal
 
 class DbSessionMiddleWare(BaseHTTPMiddleware):
-    async def db_session_middleware(self,request: Request, call_next):
+    async def dispatch(self,request: Request, call_next):
         async with AsyncSessionLocal() as session:
             # 设置会话到上下文变量
             token = current_session.set(session)

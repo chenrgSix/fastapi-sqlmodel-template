@@ -1,4 +1,4 @@
-from sqlalchemy import Column, BigInteger
+from sqlalchemy import Column, BigInteger, Select, Delete, Update
 
 from common.global_enums import IsDelete
 from utils import current_timestamp
@@ -19,3 +19,36 @@ class DbBaseModel(SQLModel, table=False):
 
     # class Config:
     #     arbitrary_types_allowed = True
+    @classmethod
+    def select(cls, fields=None):
+        if fields is None:
+            fields = cls
+        return Select(fields)
+
+    @classmethod
+    def delete(cls):
+        return Delete(cls)
+
+    @classmethod
+    def delete_by_id(cls, id:  str):
+        return Delete(cls).where(cls.id==id)
+
+    @classmethod
+    def delete_by_ids(cls, ids: list[str] | str):
+        if isinstance(ids, str):
+            ids = [ids]
+        return Delete(cls).where(cls.id.in_(ids))
+
+    @classmethod
+    def update(cls):
+        return Update(cls)
+
+    @classmethod
+    def update_by_id(cls, id: str,update_dict: dict):
+        update_dict.pop("id",None)
+        return Update(cls).where(cls.id == id).values(**update_dict)
+
+    @classmethod
+    def update_by_ids(cls, ids: list[str],update_dict: dict):
+        update_dict.pop("id",None)
+        return Update(cls).where(cls.id.in_(ids)).values(**update_dict)
