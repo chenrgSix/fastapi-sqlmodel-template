@@ -15,6 +15,8 @@ from config import settings
 
 __all__ = ["app"]
 
+from exceptions.global_exc import configure_exception
+
 from middleware import add_middleware
 
 
@@ -52,14 +54,14 @@ def custom_openapi():
         routes=app.routes,
     )
 
-    # # 添加全局安全方案
-    # openapi_schema["components"]["securitySchemes"] = {
-    #     "global_auth": {
-    #         "type": "apiKey",
-    #         "in": "header",
-    #         "name": "Authorization"  # 这里可以改为任何需要的请求头名称
-    #     }
-    # }
+    # 添加全局安全方案
+    openapi_schema["components"]["securitySchemes"] = {
+        "global_auth": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "Authorization"  # 这里可以改为任何需要的请求头名称
+        }
+    }
 
     # 应用全局安全要求
     openapi_schema["security"] = [
@@ -73,7 +75,7 @@ def custom_openapi():
 app.openapi = custom_openapi
 
 # 全局异常处理
-# configure_exception(app)
+configure_exception(app)
 # 中间件
 add_middleware(app=app)
 white_list = ["/docs", "/openapi.json", "/redoc"]

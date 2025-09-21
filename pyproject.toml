@@ -21,6 +21,7 @@ dependencies = [
     "aiomysql>=0.2.0",
     "beartype>=0.21.0",
     "fastapi-pagination>=0.14.1",
+    "psutil>=7.1.0",
 ]
 [[tool.uv.index]]
 url = "https://mirrors.aliyun.com/pypi/simple"

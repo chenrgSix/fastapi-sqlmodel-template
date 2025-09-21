@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.global_context import current_session
 from entity.dto.base import BasePageQueryReq, BasePageResp, BaseQueryReq
-from utils import get_uuid, current_timestamp
+from utils import get_uuid
 
 """
 session.execute： 执行任意数据库操作语句，返回结果需要额外处理获取 数据形式：Row对象（类似元组）
@@ -18,6 +18,8 @@ session.scalars: 只适合单模型查询（不适合指定列或连表查询）
 session.scalar: 直接明确获取一条数据，可以直接返回，无需额外处理
 
 """
+
+
 class BaseService:
     model = None  # 子类必须指定模型
 
@@ -29,8 +31,9 @@ class BaseService:
             raise RuntimeError("No database session in context. "
                                "Make sure to use this service within a request context.")
         return session
+
     @classmethod
-    def get_query_stmt(cls, query_params, sessions=None,*,fields:list=None):
+    def get_query_stmt(cls, query_params, sessions=None, *, fields: list = None):
         if sessions is None:
             if fields:
                 sessions = cls.model.select(*fields)
@@ -41,6 +44,7 @@ class BaseService:
                 field = getattr(cls.model, key)
                 sessions = sessions.where(field == value)
         return sessions
+
     @classmethod
     def entity_conversion_dto(cls, entity_data: Union[list, BaseModel], dto: Type[BaseModel]) -> Union[
         BaseModel, List[BaseModel]]:
@@ -53,6 +57,11 @@ class BaseService:
                 temp = entity.to_dict()
             dto_list.append(dto(**temp))
         return dto_list
+
+    @classmethod
+    def check_base_permission(cls, daba: Any):
+        # todo
+        pass
 
     @classmethod
     async def get_by_page(cls, query_params: Union[dict, BasePageQueryReq]):
@@ -202,14 +211,13 @@ class BaseService:
         return result.rowcount
 
     @classmethod
-    async def get_data_count(cls, query_params: dict = None)->int:
+    async def get_data_count(cls, query_params: dict = None) -> int:
         if not query_params:
             raise Exception("参数为空")
-        stmt = cls.get_query_stmt(query_params,fields=[func.count(cls.model.id)])
+        stmt = cls.get_query_stmt(query_params, fields=[func.count(cls.model.id)])
         # stmt = cls.get_query_stmt(query_params)
         session = cls.get_db()
         return await session.scalar(stmt)
-
 
     @classmethod
     async def is_exist(cls, query_params: dict = None):
