@@ -59,9 +59,9 @@ class EnhanceAsyncSession(AsyncSession):
         if execution_options is None:
             default_execution_options = sig.parameters['execution_options'].default
             execution_options = default_execution_options
-        print("type(statement):{}", type(statement))
+        # print("type(statement):{}", type(statement))
         if isinstance(statement, Select):
-            print("这是查询语句，过滤逻辑删除")
+            # print("这是查询语句，过滤逻辑删除")
             delete_condition = column(Constant.LOGICAL_DELETE_FIELD) == IsDelete.NO_DELETE
             # 获取现有条件
             existing_condition = statement.whereclause

@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from utils.api_utils import server_error_response
+from entity.dto import HttpResp
 from .base import AppException
 
 logger = logging.getLogger(__name__)
@@ -35,4 +35,6 @@ def configure_exception(app: FastAPI):
 
     @app.exception_handler(Exception)
     async def global_exception_handler(request: Request, exc: Exception):
-        return server_error_response(exc)
+        return JSONResponse(
+            status_code=200,
+            content={'code': HttpResp.SYSTEM_ERROR.code, 'msg': HttpResp.SYSTEM_ERROR.msg})

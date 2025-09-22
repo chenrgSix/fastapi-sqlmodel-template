@@ -6,9 +6,11 @@ import threading
 import time
 import traceback
 
-from config import settings, show_configs
-from utils import file_utils
 
+from utils.log_utils import init_root_logger
+init_root_logger("fastapi-template")
+from utils import file_utils
+from config import settings, show_configs
 stop_event = threading.Event()
 
 RAGFLOW_DEBUGPY_LISTEN = int(os.environ.get('RAGFLOW_DEBUGPY_LISTEN', "0"))
@@ -22,14 +24,6 @@ def signal_handler(sig, frame):
 
 
 if __name__ == '__main__':
-    logging.info(r"""
-  _____        _        ____        _ _     _           
- |  __ \      | |      |  _ \      (_) |   | |          
- | |  | | __ _| |_ __ _| |_) |_   _ _| | __| | ___ _ __ 
- | |  | |/ _` | __/ _` |  _ <| | | | | |/ _` |/ _ \ '__|
- | |__| | (_| | || (_| | |_) | |_| | | | (_| |  __/ |   
- |_____/ \__,_|\__\__,_|____/ \__,_|_|_|\__,_|\___|_|   
-    """)
 
     logging.info(
         f'project base: {file_utils.get_project_base_directory()}'
@@ -43,6 +37,17 @@ if __name__ == '__main__':
     signal.signal(signal.SIGTERM, signal_handler)
     try:
         logging.info("服务启动ing...")
+        logging.info(r"""
+        ______              _     ___  ______  _____          _____                          _         _         
+        |  ___|            | |   / _ \ | ___ \|_   _|        |_   _|                        | |       | |        
+        | |_     __ _  ___ | |_ / /_\ \| |_/ /  | |   ______   | |    ___  _ __ ___   _ __  | |  __ _ | |_   ___ 
+        |  _|   / _` |/ __|| __||  _  ||  __/   | |  |______|  | |   / _ \| '_ ` _ \ | '_ \ | | / _` || __| / _ \
+        | |    | (_| |\__ \| |_ | | | || |     _| |_           | |  |  __/| | | | | || |_) || || (_| || |_ |  __/
+        \_|     \__,_||___/ \__|\_| |_/\_|     \___/           \_/   \___||_| |_| |_|| .__/ |_| \__,_| \__| \___|
+                                                                                     | |                         
+                                                                                     |_|                         
+            """)
+
         import uvicorn
         # 配置Uvicorn参数
         uvicorn_config = {

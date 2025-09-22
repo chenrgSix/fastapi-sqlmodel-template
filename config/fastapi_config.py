@@ -36,8 +36,8 @@ async def lifespan(app: FastAPI):
 
 # FastAPI应用初始化
 app = FastAPI(
-    title="DataBuilder API",
-    description="数据工厂 api",
+    title="Fast API",
+    description="FastAPI",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -48,9 +48,9 @@ def custom_openapi():
         return app.openapi_schema
 
     openapi_schema = get_openapi(
-        title="数据工厂",
+        title="Fast API",
         version="1.0.0",
-        description="数据工厂接口文档",
+        description="Fast API",
         routes=app.routes,
     )
 

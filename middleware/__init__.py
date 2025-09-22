@@ -9,7 +9,6 @@ from middleware.db_session import DbSessionMiddleWare
 beartype_this_package()
 
 def add_middleware(app: FastAPI):
-    app.add_middleware(SessionMiddleware, secret_key=secrets.token_hex(32))
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -18,6 +17,7 @@ def add_middleware(app: FastAPI):
         allow_headers=["*"],
         max_age=2592000
     )
+    app.add_middleware(SessionMiddleware, secret_key=secrets.token_hex(32))
     app.add_middleware(DbSessionMiddleWare)
 
 
