@@ -2,6 +2,7 @@ import logging
 
 from fastapi import APIRouter, Depends
 
+from router import unified_resp
 from server_info import ServerInfo
 
 logger = logging.getLogger(__name__)
@@ -10,6 +11,7 @@ router = APIRouter(prefix='/monitor', tags=["缓存监控服务"])
 
 
 @router.get('/server',summary='服务监控')
+@unified_resp
 def monitor_server():
     """服务器信息监控"""
     return {

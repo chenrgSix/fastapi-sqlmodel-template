@@ -865,6 +865,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pytz"
+version = "2025.2"
+source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
+sdist = { url = "https://mirrors.aliyun.com/pypi/packages/f8/bf/abbd3cdfb8fbc7fb3d4d38d320f2441b1e7cbe29be4f23797b4a2b5d8aac/pytz-2025.2.tar.gz", hash = "sha256:360b9e3dbb49a209c21ad61809c7fb453643e048b38924c765813546746e81c3" }
+wheels = [
+    { url = "https://mirrors.aliyun.com/pypi/packages/81/c4/34e93fe5f5429d7570ec1fa436f1986fb1f00c3e0f43a589fe2bbcd22c3f/pytz-2025.2-py2.py3-none-any.whl", hash = "sha256:5ddf76296dd8c44c26eb8f4b6f35488f3ccbf6fbbd7adee0b7262d43f0ec2f00" },
+]
+
+[[package]]
 name = "pywin32"
 version = "311"
 source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
@@ -1044,6 +1053,7 @@ dependencies = [
     { name = "mcp" },
     { name = "openai" },
     { name = "psutil" },
+    { name = "pytz" },
     { name = "ruamel-yaml" },
     { name = "sqlalchemy", extra = ["asyncio"] },
     { name = "sqlmodel" },
@@ -1065,6 +1075,7 @@ requires-dist = [
     { name = "mcp", specifier = ">=1.14.0" },
     { name = "openai", specifier = ">=1.107.3" },
     { name = "psutil", specifier = ">=7.1.0" },
+    { name = "pytz", specifier = ">=2025.2" },
     { name = "ruamel-yaml", specifier = ">=0.18.6,<0.19.0" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.43" },
     { name = "sqlmodel", specifier = ">=0.0.25" },

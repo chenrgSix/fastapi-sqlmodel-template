@@ -1,10 +1,44 @@
+import inspect
 import logging
-from typing import Union, Type
+from functools import wraps
+from typing import Union, Type, Callable, TypeVar
+from datetime import datetime
 
+import pytz
+from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
+from starlette.responses import JSONResponse
 
+from config import get_settings
+from entity.dto import HttpResp
 from exceptions.base import AppException
 from utils import get_uuid
+
+RT = TypeVar('RT')  # 返回类型
+def unified_resp(func: Callable[..., RT]) -> Callable[..., RT]:
+    """统一响应格式
+        接口正常返回时,统一响应结果格式
+    """
+
+    @wraps(func)
+    async def wrapper(*args, **kwargs) -> RT:
+        if inspect.iscoroutinefunction(func):
+            resp = await func(*args, **kwargs) or []
+        else:
+            resp = func(*args, **kwargs) or []
+        return JSONResponse(
+            content=jsonable_encoder(
+                # 正常请求响应
+                {'code': HttpResp.SUCCESS.code, 'msg': HttpResp.SUCCESS.msg, 'data': resp},
+                by_alias=False,
+                # 自定义日期时间格式编码器
+                custom_encoder={
+                    datetime: lambda dt: dt.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(get_settings().timezone))
+                    .strftime(get_settings().datetime_fmt)}),
+            media_type='application/json;charset=utf-8'
+        )
+
+    return wrapper
 
 
 class BaseController:
