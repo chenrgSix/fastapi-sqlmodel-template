@@ -10,10 +10,18 @@ from sqlmodel import SQLModel, Field
 
 class DbBaseModel(SQLModel, table=False):
     id: str = Field(default=None, max_length=32, primary_key=True)
-    created_time: int = Field(sa_column=Column(BigInteger), default_factory=current_timestamp)
+    created_time: int = Field(
+        default_factory=current_timestamp,
+        sa_type=BigInteger,
+        description="创建时间"
+    )
     # created_by = CharField(max_length=32, index=True)
-    updated_time: int = Field(sa_column=Column(BigInteger, onupdate=current_timestamp),
-                              default_factory=current_timestamp)
+    updated_time: int = Field(
+        default_factory=current_timestamp,
+        sa_type=BigInteger,
+        sa_column_kwargs={"onupdate": current_timestamp},
+        description="更新时间"
+    )
     # updated_by = CharField(max_length=32)
     is_deleted: int = Field(default=IsDelete.NO_DELETE)
 
