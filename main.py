@@ -6,11 +6,12 @@ import threading
 import time
 import traceback
 
-
 from utils.log_utils import init_root_logger
+
 init_root_logger("fastapi-template")
 from utils import file_utils
 from config import settings, show_configs
+
 stop_event = threading.Event()
 
 RAGFLOW_DEBUGPY_LISTEN = int(os.environ.get('RAGFLOW_DEBUGPY_LISTEN', "0"))
@@ -49,6 +50,7 @@ if __name__ == '__main__':
             """)
 
         import uvicorn
+
         # 配置Uvicorn参数
         uvicorn_config = {
             # "app": app,  # FastAPI应用实例

@@ -151,6 +151,7 @@ async def init_db():
         await conn.run_sync(SQLModel.metadata.create_all)
 
 
+
 if __name__ == '__main__':
     import user
 

@@ -14,7 +14,7 @@ def get_attr(obj: Any, attr: str, default: Any = None) -> Any:
     return getattr(obj, attr, default)
 
 
-class ServerInfo:
+class ServerInfoUtils:
     """服务器相关信息"""
     datetime_fmt = get_settings().datetime_fmt
 
@@ -94,9 +94,9 @@ class ServerInfo:
                 'dirName': disk.mountpoint,
                 'sysTypeName': disk.fstype,
                 'typeName': disk.device,
-                'total': ServerInfo.get_size(usage.total),
-                'free': ServerInfo.get_size(usage.free),
-                'used': ServerInfo.get_size(usage.used),
+                'total': ServerInfoUtils.get_size(usage.total),
+                'free': ServerInfoUtils.get_size(usage.free),
+                'used': ServerInfoUtils.get_size(usage.used),
                 'usage': round(usage.percent, 2),
             })
         return disk_info
@@ -117,6 +117,6 @@ class ServerInfo:
             'max': round(mem_info.vms / number, 2),
             'free': round((mem_info.vms - mem_info.rss) / number, 2),
             'usage': round(mem_info.rss / number, 2),
-            'runTime': ServerInfo.fmt_timedelta(datetime.now() - start_dt),
-            'startTime': start_dt.strftime(ServerInfo.datetime_fmt),
+            'runTime': ServerInfoUtils.fmt_timedelta(datetime.now() - start_dt),
+            'startTime': start_dt.strftime(ServerInfoUtils.datetime_fmt),
         }
