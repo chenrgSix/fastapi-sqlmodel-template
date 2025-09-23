@@ -1,12 +1,14 @@
-from typing import Union, Type, List, Any
+from typing import Union, Type, List, Any, TypeVar, Generic, Callable, Coroutine, Optional
 
 from fastapi_pagination import Params
 from fastapi_pagination.ext.sqlalchemy import paginate
 from pydantic import BaseModel
 from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import SQLModel
 
 from core.global_context import current_session
+from entity import DbBaseModel
 from entity.dto.base import BasePageQueryReq, BasePageResp, BaseQueryReq
 from utils import get_uuid
 
@@ -18,10 +20,10 @@ session.scalars: 只适合单模型查询（不适合指定列或连表查询）
 session.scalar: 直接明确获取一条数据，可以直接返回，无需额外处理
 
 """
+T = TypeVar('T', bound=DbBaseModel)
 
-
-class BaseService:
-    model = None  # 子类必须指定模型
+class BaseService(Generic[T]):
+    model: Type[T]  # 子类必须指定模型
 
     @classmethod
     def get_db(cls) -> AsyncSession:
@@ -64,7 +66,7 @@ class BaseService:
         pass
 
     @classmethod
-    async def get_by_page(cls, query_params: Union[dict, BasePageQueryReq]):
+    async def get_by_page(cls, query_params: Union[dict, BasePageQueryReq])->BasePageResp:
         if not isinstance(query_params, dict):
             query_params = query_params.model_dump()
         query_params = {k: v for k, v in query_params.items() if v is not None}
@@ -73,7 +75,7 @@ class BaseService:
 
     @classmethod
     async def auto_page(cls, query_stmt, query_params: Union[dict, BasePageQueryReq] = None,
-                        dto_model_class: Type[BaseModel] = None):
+                        dto_model_class: Type[BaseModel] = None)->BasePageResp:
         if not query_params:
             query_params = {}
         if not isinstance(query_params, dict):
@@ -114,7 +116,7 @@ class BaseService:
         })
 
     @classmethod
-    async def get_list(cls, query_params: Union[dict, BaseQueryReq]):
+    async def get_list(cls, query_params: Union[dict, BaseQueryReq])->List[T]:
         if not isinstance(query_params, dict):
             query_params = query_params.model_dump()
         query_params = {k: v for k, v in query_params.items() if v is not None}
@@ -128,10 +130,10 @@ class BaseService:
             query_stmt = query_stmt.order_by(field.asc())
         session = cls.get_db()
         exec_result = await session.execute(query_stmt)
-        return exec_result.scalars().all()
+        return list(exec_result.scalars().all())
 
     @classmethod
-    async def get_id_list(cls, query_params: Union[dict, BaseQueryReq]) -> List[Any]:
+    async def get_id_list(cls, query_params: Union[dict, BaseQueryReq]) -> List[str]:
         if not isinstance(query_params, dict):
             query_params = query_params.model_dump()
         query_params = {k: v for k, v in query_params.items() if v is not None}
@@ -148,7 +150,7 @@ class BaseService:
         return [item["id"] for item in exec_result.scalars().all()]
 
     @classmethod
-    async def save(cls, **kwargs):
+    async def save(cls, **kwargs)->T:
         sample_obj = cls.model(**kwargs)
         session = cls.get_db()
         session.add(sample_obj)
@@ -156,7 +158,7 @@ class BaseService:
         return sample_obj
 
     @classmethod
-    async def insert_many(cls, data_list, batch_size=100):
+    async def insert_many(cls, data_list, batch_size=100)->None:
         async with cls.get_db() as session:
             for d in data_list:
                 if not d.get("id", None):
@@ -166,27 +168,27 @@ class BaseService:
                 session.add_all(data_list[i: i + batch_size])
 
     @classmethod
-    async def update_by_id(cls, pid, data):
+    async def update_by_id(cls, pid, data)-> int:
         update_stmt = cls.model.update().where(cls.model.id == pid).values(**data)
         session = cls.get_db()
         result = await session.execute(update_stmt)
-        return result.rowcount
+        return result.rowcount()
 
     @classmethod
-    async def update_many_by_id(cls, data_list):
+    async def update_many_by_id(cls, data_list)->None:
         async with cls.get_db() as session:
             for data in data_list:
                 stmt = cls.model.update().where(cls.model.id == data["id"]).values(**data)
                 await session.execute(stmt)
 
     @classmethod
-    async def get_by_id(cls, pid):
+    async def get_by_id(cls, pid)->T:
         stmt = cls.model.select(cls.model.id == pid)
         session = cls.get_db()
         return await session.scalar(stmt)
 
     @classmethod
-    async def get_by_ids(cls, pids, cols=None):
+    async def get_by_ids(cls, pids, cols=None)->List[T]:
         if cols:
             objs = cls.model.select(*cols)
         else:
@@ -194,21 +196,21 @@ class BaseService:
         stmt = objs.where(cls.model.id.in_(pids))
         session = cls.get_db()
         result = await session.scalars(stmt)
-        return result.all()
+        return list(result.all())
 
     @classmethod
-    async def delete_by_id(cls, pid):
+    async def delete_by_id(cls, pid)-> int:
         del_stmt = cls.model.delete().where(cls.model.id == pid)
         session = cls.get_db()
         exec_result = await session.execute(del_stmt)
-        return exec_result.rowcount
+        return exec_result.rowcount()
 
     @classmethod
-    async def delete_by_ids(cls, pids):
+    async def delete_by_ids(cls, pids)-> int:
         session = cls.get_db()
         del_stmt = cls.model.delete().where(cls.model.id.in_(pids))
         result = await session.execute(del_stmt)
-        return result.rowcount
+        return result.rowcount()
 
     @classmethod
     async def get_data_count(cls, query_params: dict = None) -> int:
@@ -220,5 +222,5 @@ class BaseService:
         return await session.scalar(stmt)
 
     @classmethod
-    async def is_exist(cls, query_params: dict = None):
+    async def is_exist(cls, query_params: dict = None) -> bool:
         return await cls.get_data_count(query_params) > 0

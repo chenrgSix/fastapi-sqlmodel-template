@@ -1,4 +1,3 @@
-import asyncio
 import sys
 from contextlib import asynccontextmanager
 from importlib.util import module_from_spec, spec_from_file_location
@@ -13,7 +12,8 @@ from config import settings
 
 __all__ = ["app"]
 
-from entity import init_db, close_engine
+from entity import close_engine
+from entity.db_models import init_db
 
 from exceptions.global_exc import configure_exception
 
@@ -32,8 +32,9 @@ async def lifespan(app: FastAPI):
     # 2. 把40个线程改成80
     limiter.total_tokens = 80
     await init_db()
-    yield # 上面是启动时做的操作，下面是关闭时做的操作
+    yield  # 上面是启动时做的操作，下面是关闭时做的操作
     await close_engine()
+
 
 # FastAPI应用初始化
 app = FastAPI(
@@ -113,4 +114,3 @@ client_urls_prefix = [
     for pages_dir in pages_dirs
     for path in search_pages_path(pages_dir)
 ]
-

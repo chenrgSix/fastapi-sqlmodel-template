@@ -58,6 +58,7 @@ uv add xxx
 ```bash
 # 复制环境变量模板并修改
 cp .env.template .env
+# 如需启用YAML 配置文件支持，需要将.env中 的LOAD_YAML设置为 true，并执行以下操作
 cp application-template.yaml application.yaml
 # 根据需要编辑.env和application.yaml文件
 ```
@@ -72,7 +73,6 @@ python main.py
 ## API路由
 
 - `/monitor` - 系统监控相关API
-- `/test` - 测试相关API
 - `/user` - 用户相关API
 
 ## 开发指南

@@ -1,10 +1,8 @@
-import asyncio
 import inspect
 from typing import Any
 
 from sqlalchemy import Executable, Result, Select, Delete, Update, column, and_
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlmodel import SQLModel
 
 from common.constant import Constant
 from common.global_enums import IsDelete
@@ -143,24 +141,3 @@ AsyncSessionLocal = async_sessionmaker(
 # 关闭引擎
 async def close_engine():
     await engine.dispose()
-
-
-# 初始化数据库表（异步执行）
-async def init_db():
-    async with engine.begin() as conn:
-        await conn.run_sync(SQLModel.metadata.create_all)
-
-
-
-if __name__ == '__main__':
-    import user
-
-
-    async def main():
-        try:
-            await init_db()
-        finally:
-            await close_engine()  # 确保引擎关闭
-
-
-    asyncio.run(main())
