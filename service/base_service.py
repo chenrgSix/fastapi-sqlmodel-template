@@ -82,7 +82,7 @@ class BaseService(Generic[T]):
             query_params = query_params.model_dump()
         page_number = query_params.get("page_number", 1)
         page_size = query_params.get("page_size", 12)
-        desc = query_params.get("desc", "desc")
+        sort = query_params.get("sort", "desc")
         orderby = query_params.get("orderby", "created_time")
         session = cls.get_db()
         data_count = None
@@ -91,11 +91,11 @@ class BaseService(Generic[T]):
                 "page_number": page_number,
                 "page_size": page_size,
                 "count": data_count,
-                "desc": desc,
+                "sort": sort,
                 "orderby": orderby,
                 "data": [],
             })
-        if desc == "desc":
+        if sort == "desc":
             query_stmt = query_stmt.order_by(getattr(cls.model, orderby).desc())
         else:
             query_stmt = query_stmt.order_by(getattr(cls.model, orderby).asc())
@@ -110,7 +110,7 @@ class BaseService(Generic[T]):
             "page_size": page_size,
             "page_count": query_page_result.pages,
             "count": query_page_result.total,
-            "desc": desc,
+            "sort": sort,
             "orderby": orderby,
             "data": result,
         })
@@ -120,11 +120,11 @@ class BaseService(Generic[T]):
         if not isinstance(query_params, dict):
             query_params = query_params.model_dump()
         query_params = {k: v for k, v in query_params.items() if v is not None}
-        desc = query_params.get("desc", "desc")
+        sort = query_params.get("sort", "desc")
         orderby = query_params.get("orderby", "created_time")
         query_stmt = cls.get_query_stmt(query_params)
         field = getattr(cls.model, orderby)
-        if desc == "desc":
+        if sort == "desc":
             query_stmt = query_stmt.order_by(field.desc())
         else:
             query_stmt = query_stmt.order_by(field.asc())
@@ -137,11 +137,11 @@ class BaseService(Generic[T]):
         if not isinstance(query_params, dict):
             query_params = query_params.model_dump()
         query_params = {k: v for k, v in query_params.items() if v is not None}
-        desc = query_params.get("desc", "desc")
+        sort = query_params.get("sort", "desc")
         orderby = query_params.get("orderby", "created_time")
         query_stmt = cls.model.select(cls.model.id)
         query_stmt = cls.get_query_stmt(query_params, query_stmt)
-        if desc == "desc":
+        if sort == "desc":
             query_stmt = query_stmt.order_by(cls.model.getter_by(orderby).desc())
         else:
             query_stmt = query_stmt.order_by(cls.model.getter_by(orderby).asc())

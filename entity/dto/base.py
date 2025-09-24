@@ -13,7 +13,7 @@ class BaseTabelDto(BaseModel):
     is_deleted: Optional[int] = None
 
 class BaseQueryReq(BaseTabelDto):
-    desc: Optional[str] = Field(default="desc", description=" asc或 desc")
+    sort: Optional[str] = Field(default="desc", description=" asc或 desc")
     orderby: Optional[str] = Field(default="created_time", description="根据什么字段排序")
 
 
@@ -31,7 +31,7 @@ class BasePageResp(BaseModel):
     page_number: Optional[int]
     page_size: Optional[int]
     page_count: Optional[int]
-    desc: Optional[str]
+    sort: Optional[str]
     orderby: Optional[str]
     count: Optional[int]
     data: Optional[List[Any]]
