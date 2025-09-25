@@ -172,7 +172,7 @@ class BaseService(Generic[T]):
         update_stmt = cls.model.update().where(cls.model.id == pid).values(**data)
         session = cls.get_db()
         result = await session.execute(update_stmt)
-        return result.rowcount()
+        return result.rowcount
 
     @classmethod
     async def update_many_by_id(cls, data_list)->None:
@@ -183,7 +183,7 @@ class BaseService(Generic[T]):
 
     @classmethod
     async def get_by_id(cls, pid)->T:
-        stmt = cls.model.select(cls.model.id == pid)
+        stmt = cls.model.select().where(cls.model.id == pid)
         session = cls.get_db()
         return await session.scalar(stmt)
 
@@ -203,14 +203,14 @@ class BaseService(Generic[T]):
         del_stmt = cls.model.delete().where(cls.model.id == pid)
         session = cls.get_db()
         exec_result = await session.execute(del_stmt)
-        return exec_result.rowcount()
+        return exec_result.rowcount
 
     @classmethod
     async def delete_by_ids(cls, pids)-> int:
         session = cls.get_db()
         del_stmt = cls.model.delete().where(cls.model.id.in_(pids))
         result = await session.execute(del_stmt)
-        return result.rowcount()
+        return result.rowcount
 
     @classmethod
     async def get_data_count(cls, query_params: dict = None) -> int:

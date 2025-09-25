@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Query
 
-from entity.dto.UserDto import UserQueryPageReq, UserQueryReq
+from entity.dto.user_dto import UserQueryPageReq, UserQueryReq
 from router import BaseController, unified_resp
 from service.user_service import UserService
 

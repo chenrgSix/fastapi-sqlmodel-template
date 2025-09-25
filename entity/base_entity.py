@@ -1,7 +1,7 @@
 from sqlalchemy import Column, BigInteger, Select, Delete, Update
 
 from common.global_enums import IsDelete
-from utils import current_timestamp
+from utils import current_timestamp, get_uuid
 
 # 上下文变量，控制是否启用逻辑删除过滤
 _SOFT_DELETE_ENABLED = True
@@ -9,7 +9,7 @@ from sqlmodel import SQLModel, Field
 
 
 class DbBaseModel(SQLModel, table=False):
-    id: str = Field(default=None, max_length=32, primary_key=True)
+    id: str = Field(default_factory=get_uuid, max_length=32, primary_key=True)
     created_time: int = Field(
         default_factory=current_timestamp,
         sa_type=BigInteger,

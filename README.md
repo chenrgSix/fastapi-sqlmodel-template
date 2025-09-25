@@ -1,12 +1,11 @@
 # RG-FastAPI-SQLModel 模板项目
 
 一个基于FastAPI和SQLModel的现代化Python Web应用模板，提供了快速开发RESTful API的基础架构。
-
 ## 项目特点
 
 - 基于FastAPI构建的高性能异步Web框架
 - 使用SQLModel进行数据库ORM操作，结合了SQLAlchemy和Pydantic的优点
-- 完整的项目结构，包括路由、服务层、实体模型和DTO
+- 完整的项目结构，包括路由（自动注册）、服务层、实体模型和DTO
 - 内置异常处理机制
 - 中间件支持，包括数据库会话管理
 - 实用工具集合，包括日志、文件操作、IP工具等
