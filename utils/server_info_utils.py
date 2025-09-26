@@ -7,6 +7,7 @@ from typing import List, Any
 import psutil
 
 from config import get_settings
+from entity.dto.monitor_dto import CpuInfo, MemoryInfo, SystemInfo, DiskInfo, PythonEnvInfo
 from utils.ip_utils import IpUtil
 
 
@@ -50,7 +51,7 @@ class ServerInfoUtils:
         return res
 
     @staticmethod
-    def get_cpu_info() -> dict:
+    def get_cpu_info() -> CpuInfo:
         """获取CPU信息"""
         res = {'cpu_num': psutil.cpu_count(logical=True)}
         cpu_times = psutil.cpu_times()
@@ -62,35 +63,35 @@ class ServerInfoUtils:
         res['used'] = round(cpu_times.user / total, 2)
         res['wait'] = round(get_attr(cpu_times, 'iowait', 0.0) / total, 2)
         res['free'] = round(cpu_times.idle / total, 2)
-        return res
+        return CpuInfo(**res)
 
     @staticmethod
-    def get_mem_info() -> dict:
+    def get_mem_info() -> MemoryInfo:
         """获取内存信息"""
         number = 1024 ** 3
-        return {
+        return MemoryInfo(**{
             'total': round(psutil.virtual_memory().total / number, 2),
             'used': round(psutil.virtual_memory().used / number, 2),
             'free': round(psutil.virtual_memory().available / number, 2),
-            'usage': round(psutil.virtual_memory().percent, 2)}
+            'usage': round(psutil.virtual_memory().percent, 2)})
 
     @staticmethod
-    def get_sys_info() -> dict:
+    def get_sys_info() -> SystemInfo:
         """获取服务器信息"""
-        return {
+        return SystemInfo(**{
             'computerName': IpUtil.get_host_name(),
             'computerIp': IpUtil.get_host_ip(),
             'userDir': os.path.dirname(os.path.abspath(os.path.join(__file__, '../..'))),
             'osName': platform.system(),
-            'osArch': platform.machine()}
+            'osArch': platform.machine()})
 
     @staticmethod
-    def get_disk_info() -> List[dict]:
+    def get_disk_info() -> List[DiskInfo]:
         """获取磁盘信息"""
         disk_info = []
         for disk in psutil.disk_partitions():
             usage = psutil.disk_usage(disk.mountpoint)
-            disk_info.append({
+            disk_info.append(DiskInfo(**{
                 'dirName': disk.mountpoint,
                 'sysTypeName': disk.fstype,
                 'typeName': disk.device,
@@ -98,7 +99,7 @@ class ServerInfoUtils:
                 'free': ServerInfoUtils.get_size(usage.free),
                 'used': ServerInfoUtils.get_size(usage.used),
                 'usage': round(usage.percent, 2),
-            })
+            }))
         return disk_info
 
     @staticmethod
@@ -108,7 +109,7 @@ class ServerInfoUtils:
         cur_proc = psutil.Process(os.getpid())
         mem_info = cur_proc.memory_info()
         start_dt = datetime.fromtimestamp(cur_proc.create_time())
-        return {
+        return PythonEnvInfo(**{
             'name': 'Python',
             'version': platform.python_version(),
             'home': sys.executable,
@@ -119,4 +120,4 @@ class ServerInfoUtils:
             'usage': round(mem_info.rss / number, 2),
             'runTime': ServerInfoUtils.fmt_timedelta(datetime.now() - start_dt),
             'startTime': start_dt.strftime(ServerInfoUtils.datetime_fmt),
-        }
+        })
