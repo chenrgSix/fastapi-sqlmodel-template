@@ -1,8 +1,9 @@
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Generic, TypeVar
 from typing import Union
 
 from pydantic import BaseModel, Field
 
+T = TypeVar('T')
 
 class BaseTabelDto(BaseModel):
     id: Optional[str] = None
@@ -27,14 +28,14 @@ class BaseRenameReq(BaseModel):
     name: str
 
 
-class BasePageResp(BaseModel):
+class BasePageResp(BaseModel, Generic[T]):
     page_number: Optional[int]
     page_size: Optional[int]
     page_count: Optional[int]
     sort: Optional[str]
     orderby: Optional[str]
     count: Optional[int]
-    data: Optional[List[Any]]
+    data: Optional[List[T]]
 
     class Config:
         arbitrary_types_allowed = True

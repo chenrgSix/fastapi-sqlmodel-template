@@ -1,8 +1,8 @@
 import inspect
 import logging
-from functools import wraps
-from typing import Union, Type, Callable, TypeVar
 from datetime import datetime
+from functools import wraps
+from typing import Union, Type, Callable, TypeVar, get_type_hints
 
 import pytz
 from fastapi.encoders import jsonable_encoder
@@ -10,15 +10,24 @@ from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
 from config import get_settings
-from entity.dto import HttpResp
+from entity.dto import HttpResp, ApiResponse
 from exceptions.base import AppException
 from utils import get_uuid
 
 RT = TypeVar('RT')  # 返回类型
+
+
 def unified_resp(func: Callable[..., RT]) -> Callable[..., RT]:
     """统一响应格式
         接口正常返回时,统一响应结果格式
     """
+    # 获取原始函数的返回类型注解
+    hints = get_type_hints(func)
+    return_type = hints.get('return', None)
+
+    # 修改函数的返回类型注解
+    if return_type:
+        func.__annotations__['return'] = ApiResponse[return_type]
 
     @wraps(func)
     async def wrapper(*args, **kwargs) -> RT:

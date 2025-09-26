@@ -1,9 +1,14 @@
 from collections import namedtuple
+from typing import TypeVar, Generic, Optional
 
 from beartype.claw import beartype_this_package
+from pydantic import BaseModel
 
 beartype_this_package()
 HttpCode = namedtuple('HttpResp', ['code', 'msg'])
+
+T = TypeVar("T")
+
 
 class HttpResp:
     """HTTP响应结果
@@ -25,3 +30,9 @@ class HttpResp:
     DATA_ALREADY_EXISTS = HttpCode(409, '数据已存在')
     SYSTEM_ERROR = HttpCode(500, '系统错误')
     SYSTEM_TIMEOUT_ERROR = HttpCode(504, '请求超时')
+
+
+class ApiResponse(BaseModel, Generic[T]):
+    code: int = HttpResp.SUCCESS.code
+    message: str = HttpResp.SUCCESS.msg
+    data: Optional[T] = None
