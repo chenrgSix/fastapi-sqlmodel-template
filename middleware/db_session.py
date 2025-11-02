@@ -17,4 +17,6 @@ class DbSessionMiddleWare(BaseHTTPMiddleware):
             finally:
                 # 重置上下文变量
                 current_session.reset(token)
+                # 无论成功与否，都必须关闭会话
+                await session.close()
         return response
