@@ -1,4 +1,6 @@
 import inspect
+from contextlib import asynccontextmanager
+from functools import wraps
 from typing import Any
 
 from sqlalchemy import Executable, Result, Select, Delete, Update, column, and_
@@ -136,6 +138,25 @@ AsyncSessionLocal = async_sessionmaker(
     expire_on_commit=False,  # 提交后不使对象过期
     autoflush=False  # 禁用自动刷新
 )
+
+
+# 获取数据库session的独立方法
+@asynccontextmanager
+async def get_db_session():
+    """获取数据库session的上下文管理器"""
+    async with AsyncSessionLocal() as session:
+        async with session.begin():
+            yield session
+
+
+def with_db_session(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        async with get_db_session() as session:
+            result = await func(db_session=session, *args, **kwargs)
+            return result
+
+    return wrapper
 
 
 # 关闭引擎
