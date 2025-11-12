@@ -1,6 +1,6 @@
 import asyncio
 import inspect
-from functools import wraps
+from functools import wraps, partial
 from typing import Any, Callable
 """
 这个装饰器是用于同步代码，使其支持异步调用，避免阻塞事件事件循环
@@ -26,6 +26,19 @@ class SmartWrapper:
     def __init__(self, func: Callable):
         self.func = func
         self._is_coroutine = asyncio.iscoroutinefunction(func)
+        wraps(func)(self)  # 使用 wraps 保留原始函数的元信息
+
+    def __get__(self, instance, owner):
+        """
+        描述符协议实现，用于支持实例方法装饰
+        """
+        if instance is None:
+            # 如果通过类访问 (e.g., MyClass.my_method)，返回 self
+            return self
+
+        # 如果通过实例访问 (e.g., obj.my_method)，返回一个绑定了实例的新方法
+        # partial 会将 instance 作为第一个参数，预填充到 __call__ 中
+        return partial(self.__call__, instance)
 
     def __call__(self, *args, **kwargs):
         """智能调用：自动检测并适配调用环境"""
