@@ -18,6 +18,8 @@ dependencies = [
     "beartype>=0.21.0", # 类型检查
     "psutil>=7.1.0", # 系统资源
     "pytz>=2025.2",
+    "uvloop>=0.21.0; sys_platform != 'win32'",
 ]
 [[tool.uv.index]]
 url = "https://mirrors.aliyun.com/pypi/simple"
+default = true
