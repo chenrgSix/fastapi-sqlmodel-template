@@ -18,7 +18,7 @@ def add_middleware(app: FastAPI):
         max_age=2592000
     )
     app.add_middleware(SessionMiddleware, secret_key=secrets.token_hex(32))
-    app.add_middleware(DbSessionMiddleWare)
+    # app.add_middleware(DbSessionMiddleWare)  #不再需要
 
 
 

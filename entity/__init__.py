@@ -1,7 +1,7 @@
+import functools
 import inspect
 from contextlib import asynccontextmanager
-from functools import wraps
-from typing import Any
+from typing import Any, ParamSpec, TypeVar, Callable
 
 from sqlalchemy import Executable, Result, Select, Delete, Update, column, and_
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
@@ -9,7 +9,10 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from common.constant import Constant
 from common.global_enums import IsDelete
 from config import settings
+
 from entity.base_entity import DbBaseModel
+P = ParamSpec('P')
+T = TypeVar('T')
 
 engine = create_async_engine(
     settings.database_url,
@@ -149,14 +152,33 @@ async def get_db_session():
             yield session
 
 
-def with_db_session(func):
-    @wraps(func)
-    async def wrapper(*args, **kwargs):
-        async with get_db_session() as session:
-            result = await func(db_session=session, *args, **kwargs)
-            return result
 
-    return wrapper
+def with_db_session(session_param_name: str = "session"):
+    """
+    一个装饰器，用于为异步函数自动注入数据库会话。
+
+    Args:
+        session_param_name: 被装饰函数中，用于接收会话的参数名，默认为 'session'。
+    """
+    def decorator(func: Callable[P, T]) -> Callable[P, T]:
+        # 确保只装饰异步函数
+        if not inspect.iscoroutinefunction(func):
+            raise TypeError("`with_db_session` can only be used on async functions.")
+
+        @functools.wraps(func)
+        async def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+            # 如果调用时已经手动传了 session，就直接用
+            if session_param_name in kwargs:
+                return await func(*args, **kwargs)
+
+            # 否则，创建一个新 session 并注入
+            async with get_db_session() as session:
+                kwargs[session_param_name] = session
+                return await func(*args, **kwargs)
+
+        return wrapper
+    return decorator
+
 
 
 # 关闭引擎

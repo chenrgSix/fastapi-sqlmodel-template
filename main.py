@@ -14,9 +14,6 @@ from config import settings, show_configs
 
 stop_event = threading.Event()
 
-RAGFLOW_DEBUGPY_LISTEN = int(os.environ.get('RAGFLOW_DEBUGPY_LISTEN', "0"))
-
-
 def signal_handler(sig, frame):
     logging.info("Received interrupt signal, shutting down...")
     stop_event.set()
@@ -30,10 +27,6 @@ if __name__ == '__main__':
         f'project base: {file_utils.get_project_base_directory()}'
     )
     show_configs()
-    # import argparse
-    # parser = argparse.ArgumentParser()
-    #
-    # args = parser.parse_args()
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     try:
