@@ -19,6 +19,7 @@ dependencies = [
     "psutil>=7.1.0", # 系统资源
     "pytz>=2025.2",
     "uvloop>=0.21.0; sys_platform != 'win32'",
+    "miniopy-async>=1.23.4",
 ]
 [[tool.uv.index]]
 url = "https://mirrors.aliyun.com/pypi/simple"

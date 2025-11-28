@@ -1,3 +1,4 @@
-zhipu:
-  api-key:
-  base-url:
+minio:
+  username: "user"
+  password: "password"
+  host: "127.0.0.1:9000"
