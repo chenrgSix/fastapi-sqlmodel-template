@@ -73,8 +73,8 @@ class BaseController:
         return datas
 
 
-    async def get_by_id(self, id: str, dto_class: Type[BaseModel] = None):
-        result = await self.service.get_by_id(id,dto_class)
+    async def get_by_id(self, id: str):
+        result = await self.service.get_by_id(id)
         if not result:
             raise AppException(f"不存在 id 为{id}的数据")
         return result
