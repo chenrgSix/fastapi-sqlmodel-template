@@ -28,11 +28,10 @@ class DbBaseModel(SQLModel, table=False):
     # class Config:
     #     arbitrary_types_allowed = True
     @classmethod
-    def select(cls, fields=None):
+    def select(cls, fields: list = None):
         if fields is None:
-            fields = cls
-        return Select(fields)
-
+            return Select(cls)
+        return Select(*fields)
 
     @classmethod
     def delete(cls):

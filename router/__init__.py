@@ -14,6 +14,7 @@ from entity.dto import HttpResp, ApiResponse
 from exceptions.base import AppException
 from utils import get_uuid
 
+__all__ = ["unified_resp", "BaseController"]
 RT = TypeVar('RT')  # 返回类型
 
 
@@ -35,6 +36,7 @@ def unified_resp(func: Callable[..., RT]) -> Callable[..., RT]:
             resp = await func(*args, **kwargs) or []
         else:
             resp = func(*args, **kwargs) or []
+
         return JSONResponse(
             content=jsonable_encoder(
                 # 正常请求响应
@@ -58,33 +60,23 @@ class BaseController:
     async def base_page(self, req: Union[dict, BaseModel], dto_class: Type[BaseModel] = None):
         if not isinstance(req, dict):
             req = req.model_dump()
-        result = await self.service.get_by_page(req)
-        datas = result.data
-        if datas and dto_class:
-            result.data = self.service.entity_conversion_dto(datas, dto_class)
+        result = await self.service.get_by_page(req,dto_class)
+        # datas = result.data
+        # if datas and dto_class:
+        #     result.data = self.service.entity_conversion_dto(datas, dto_class)
         return result
 
     async def base_list(self, req: Union[dict, BaseModel], dto_class: Type[BaseModel] = None):
         if not isinstance(req, dict):
             req = req.model_dump()
-        datas = await self.service.get_list(req)
-        if datas and dto_class:
-            datas = self.service.entity_conversion_dto(datas, dto_class)
+        datas = await self.service.get_list(req,dto_class)
         return datas
 
-    async def get_all(self, dto_class: Type[BaseModel] = None):
-        result = await self.service.get_all()
-        if dto_class:
-            result = self.service.entity_conversion_dto(result, dto_class)
-        return result
 
     async def get_by_id(self, id: str, dto_class: Type[BaseModel] = None):
-        data = await self.service.get_by_id(id)
-        if not data:
+        result = await self.service.get_by_id(id,dto_class)
+        if not result:
             raise AppException(f"不存在 id 为{id}的数据")
-        result = data.to_dict()
-        if dto_class:
-            result = self.service.entity_conversion_dto(result, dto_class)
         return result
 
     async def add(self, req: Union[dict, BaseModel]):
@@ -102,7 +94,7 @@ class BaseController:
             db_query_data = await self.service.get_by_id(id)
             if not db_query_data:
                 raise AppException(f"数据不存在")
-        self.service.check_base_permission(db_query_data)
+        await self.service.check_base_permission(db_query_data)
         try:
             return await self.service.delete_by_id(id)
         except Exception as e:
@@ -117,7 +109,7 @@ class BaseController:
             db_query_data = await self.service.get_by_id(data_id)
             if not db_query_data:
                 raise AppException(f"数据不存在")
-        self.service.check_base_permission(db_query_data)
+        await self.service.check_base_permission(db_query_data)
 
         try:
             return await self.service.update_by_id(data_id, req)
